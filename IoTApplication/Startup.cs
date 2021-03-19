@@ -62,6 +62,7 @@ namespace IoTApplication
 
             app.UseCors(builder =>
             {
+                builder.AllowAnyOrigin();
                 builder.AllowAnyMethod();
                 builder.AllowAnyHeader();
             });
