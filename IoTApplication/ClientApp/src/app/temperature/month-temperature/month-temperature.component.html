@@ -1,4 +1,4 @@
-<div class="chart-wrapper">
+<div *ngIf="chartReady" class="chart-wrapper">
   <canvas baseChart
       [datasets]="lineChartData"
       [labels]="lineChartLabels"

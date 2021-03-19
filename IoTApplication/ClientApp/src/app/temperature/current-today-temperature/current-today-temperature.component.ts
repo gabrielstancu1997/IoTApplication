@@ -1,18 +1,18 @@
-import { DateMonthAverageValue } from './../../DateMonthAverageValue';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, Inject} from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, Inject, OnInit } from '@angular/core';
 import { ChartDataSets } from 'chart.js';
 import { Color, Label } from 'ng2-charts';
+import { DateValueToday } from 'src/app/DateValueToday';
 
 @Component({
-  selector: 'app-month-temperature',
-  templateUrl: './month-temperature.component.html',
-  styleUrls: ['./month-temperature.component.scss']
+  selector: 'app-current-today-temperature',
+  templateUrl: './current-today-temperature.component.html',
+  styleUrls: ['./current-today-temperature.component.scss']
 })
-export class MonthTemperatureComponent {
+export class CurrentTodayTemperatureComponent {
 
-  listDateMonthAverageValue: DateMonthAverageValue[];
-  listDateMonthAverageValueParse: DateMonthAverageValue[] = [];
+  listDateMonthAverageValue: DateValueToday[];
+  listDateMonthAverageValueParse: DateValueToday[] = [];
   listAverageMonths: number[] = [];
   lineChartData: ChartDataSets[] = [];
   lineChartLabels: Label[] = [];
@@ -31,14 +31,13 @@ export class MonthTemperatureComponent {
 
   lineChartLegend = true;
   lineChartPlugins = [];
-  lineChartType = 'bar';
+  lineChartType = 'line';
   chartReady: boolean;
   http: any;
 
-
   constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
 
-    http.get<DateMonthAverageValue[]>(baseUrl + 'Values/months-temperature-values/2021').subscribe(result => {
+    http.get<DateValueToday[]>(baseUrl + 'Values/current-today-temperature').subscribe(result => {
       this.listDateMonthAverageValue = result;
 
       this.listDateMonthAverageValue.forEach(
@@ -49,13 +48,13 @@ export class MonthTemperatureComponent {
 
       this.listDateMonthAverageValueParse.forEach(
         r => {
-          this.listAverageMonths.push(r.AvgMonth);
-          this.lineChartLabels.push(r.DateMonthName);
+          this.listAverageMonths.push(r.AvgHour);
+          this.lineChartLabels.push(r.HourDescription);
         }
       );
 
       this.lineChartData = [
-        { data: this.listAverageMonths, label: 'Temperature of the Year' },
+        { data: this.listAverageMonths, label: 'Temperature of the day' },
       ];
 
       this.chartReady = true;
@@ -64,5 +63,3 @@ export class MonthTemperatureComponent {
 
 
 }
-
-
