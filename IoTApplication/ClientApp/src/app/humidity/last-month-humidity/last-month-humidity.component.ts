@@ -2,17 +2,18 @@ import { HttpClient } from '@angular/common/http';
 import { Component, Inject, OnInit } from '@angular/core';
 import { ChartDataSets } from 'chart.js';
 import { Color, Label } from 'ng2-charts';
-import { DateMonthAverageValue } from 'src/app/DateMonthAverageValue';
+import { LastMonthAverageValue } from 'src/app/LastMonthAverageValue';
 
 @Component({
-  selector: 'app-month-humidity',
-  templateUrl: './month-humidity.component.html',
-  styleUrls: ['./month-humidity.component.scss']
+  selector: 'app-last-month-humidity',
+  templateUrl: './last-month-humidity.component.html',
+  styleUrls: ['./last-month-humidity.component.scss']
 })
-export class MonthHumidityComponent {
+export class LastMonthHumidityComponent {
 
-  listDateMonthAverageValue: DateMonthAverageValue[];
-  listDateMonthAverageValueParse: DateMonthAverageValue[] = [];
+
+  listDateMonthAverageValue: LastMonthAverageValue[];
+  listDateMonthAverageValueParse: LastMonthAverageValue[] = [];
   listAverageMonths: number[] = [];
   lineChartData: ChartDataSets[] = [];
   lineChartLabels: Label[] = [];
@@ -31,12 +32,13 @@ export class MonthHumidityComponent {
 
   lineChartLegend = true;
   lineChartPlugins = [];
-  lineChartType = 'bar';
+  lineChartType = 'line';
   chartReady: boolean;
   http: any;
+
   constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
 
-    http.get<DateMonthAverageValue[]>(baseUrl + 'Values/months-humidity-values/2021').subscribe(result => {
+    http.get<LastMonthAverageValue[]>(baseUrl + 'Values/current-month-humidity').subscribe(result => {
       this.listDateMonthAverageValue = result;
 
       this.listDateMonthAverageValue.forEach(
@@ -47,17 +49,16 @@ export class MonthHumidityComponent {
 
       this.listDateMonthAverageValueParse.forEach(
         r => {
-          this.listAverageMonths.push(r.AvgMonth);
-          this.lineChartLabels.push(r.DateMonthName);
+          this.listAverageMonths.push(r.AvgDay);
+          this.lineChartLabels.push(r.DayDescription);
         }
       );
 
       this.lineChartData = [
-        { data: this.listAverageMonths, label: 'Humidity of the Year' },
+        { data: this.listAverageMonths, label: 'Humidity of the month' },
       ];
 
       this.chartReady = true;
     }, error => console.error(error));
   }
-
 }

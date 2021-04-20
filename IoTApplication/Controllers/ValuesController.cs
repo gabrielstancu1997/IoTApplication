@@ -101,7 +101,6 @@ namespace AplicatieLicentaIoT.Controllers
 
             return JsonConvert.SerializeObject(temperature.ToList().OrderBy(r => r.DayNumber));
         }
-
         [HttpGet("current-today-temperature")]
         public ActionResult<string> GetTodayTemperature()
         {
@@ -115,6 +114,49 @@ namespace AplicatieLicentaIoT.Controllers
                 });
 
             return JsonConvert.SerializeObject(temperature.ToList().OrderBy(r => r.HourDescription));
+        }
+        [HttpGet("months-humidity-values/{year}")]
+        public ActionResult<string> GetMonthsHumidityValues(int year)
+        {
+            var humidity = _context.Values
+                 .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Year == year)
+                 .GroupBy(x => new { x.Timestamp.Value.Year, x.Timestamp.Value.Month })
+                 .Select(y => new DateValue
+                 {
+                     DateMonthName = getFullMonthName(y.Key.Month),
+                     AvgMonth = y.Average(x => x.Value1.Value)
+                 });
+
+            return JsonConvert.SerializeObject(humidity.ToList().OrderBy(r => getNumberMonthFromName(r.DateMonthName)));
+        }
+        [HttpGet("current-month-humidity")]
+        public ActionResult<string> GetLastMonthHumidityValue()
+        {
+            var humidity = _context.Values
+               .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Month == DateTime.Today.Month)
+               .GroupBy(x => new { x.Timestamp.Value.Day })
+               .Select(x => new DateValueDay
+               {
+                   DayDescription = x.Key.Day.ToString() + " " + getFullDayName(x.Key.Day),
+                   AvgDay = x.Average(x => x.Value1.Value),
+                   DayNumber = x.Key.Day
+               });
+
+            return JsonConvert.SerializeObject(humidity.ToList().OrderBy(r => r.DayNumber));
+        }
+        [HttpGet("current-today-humidity")]
+        public ActionResult<string> GetTodayHumidity()
+        {
+            var humidity = _context.Values
+                .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Day == DateTime.Today.Day)
+                .GroupBy(x => new { x.Timestamp.Value.Hour })
+                .Select(x => new DateValueToday
+                {
+                    HourDescription = getFullDayHour(x.Key.Hour),
+                    AvgHour = x.Average(x => x.Value1.Value),
+                });
+
+            return JsonConvert.SerializeObject(humidity.ToList().OrderBy(r => r.HourDescription));
         }
 
 

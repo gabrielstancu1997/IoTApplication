@@ -2,17 +2,17 @@ import { HttpClient } from '@angular/common/http';
 import { Component, Inject, OnInit } from '@angular/core';
 import { ChartDataSets } from 'chart.js';
 import { Color, Label } from 'ng2-charts';
-import { DateMonthAverageValue } from 'src/app/DateMonthAverageValue';
+import { DateValueToday } from 'src/app/DateValueToday';
 
 @Component({
-  selector: 'app-month-humidity',
-  templateUrl: './month-humidity.component.html',
-  styleUrls: ['./month-humidity.component.scss']
+  selector: 'app-current-today-humidity',
+  templateUrl: './current-today-humidity.component.html',
+  styleUrls: ['./current-today-humidity.component.scss']
 })
-export class MonthHumidityComponent {
+export class CurrentTodayHumidityComponent {
 
-  listDateMonthAverageValue: DateMonthAverageValue[];
-  listDateMonthAverageValueParse: DateMonthAverageValue[] = [];
+  listDateMonthAverageValue: DateValueToday[];
+  listDateMonthAverageValueParse: DateValueToday[] = [];
   listAverageMonths: number[] = [];
   lineChartData: ChartDataSets[] = [];
   lineChartLabels: Label[] = [];
@@ -31,12 +31,13 @@ export class MonthHumidityComponent {
 
   lineChartLegend = true;
   lineChartPlugins = [];
-  lineChartType = 'bar';
+  lineChartType = 'line';
   chartReady: boolean;
   http: any;
+
   constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
 
-    http.get<DateMonthAverageValue[]>(baseUrl + 'Values/months-humidity-values/2021').subscribe(result => {
+    http.get<DateValueToday[]>(baseUrl + 'Values/current-today-humidity').subscribe(result => {
       this.listDateMonthAverageValue = result;
 
       this.listDateMonthAverageValue.forEach(
@@ -47,17 +48,18 @@ export class MonthHumidityComponent {
 
       this.listDateMonthAverageValueParse.forEach(
         r => {
-          this.listAverageMonths.push(r.AvgMonth);
-          this.lineChartLabels.push(r.DateMonthName);
+          this.listAverageMonths.push(r.AvgHour);
+          this.lineChartLabels.push(r.HourDescription);
         }
       );
 
       this.lineChartData = [
-        { data: this.listAverageMonths, label: 'Humidity of the Year' },
+        { data: this.listAverageMonths, label: 'Humidity of the day' },
       ];
 
       this.chartReady = true;
     }, error => console.error(error));
   }
+
 
 }
