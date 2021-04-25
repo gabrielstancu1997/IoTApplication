@@ -90,7 +90,7 @@ namespace AplicatieLicentaIoT.Controllers
         public ActionResult<string> GetLastMonthTemperatureValue()
         {
             var temperature = _context.Values
-                .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Month == DateTime.Today.Month)
+                .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Month == DateTime.Today.Month && x.Timestamp.Value.Year == DateTime.Today.Year)
                 .GroupBy(x => new { x.Timestamp.Value.Day })
                 .Select(x => new DateValueDay
                 {  
@@ -105,7 +105,7 @@ namespace AplicatieLicentaIoT.Controllers
         public ActionResult<string> GetTodayTemperature()
         {
             var temperature = _context.Values
-                .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Day == DateTime.Today.Day)
+                .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Day == DateTime.Today.Day && x.Timestamp.Value.Month == DateTime.Today.Month && x.Timestamp.Value.Year == DateTime.Today.Year)
                 .GroupBy(x => new { x.Timestamp.Value.Hour })
                 .Select(x => new DateValueToday
                 {
@@ -133,7 +133,7 @@ namespace AplicatieLicentaIoT.Controllers
         public ActionResult<string> GetLastMonthHumidityValue()
         {
             var humidity = _context.Values
-               .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Month == DateTime.Today.Month)
+               .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Month == DateTime.Today.Month && x.Timestamp.Value.Year == DateTime.Today.Year)
                .GroupBy(x => new { x.Timestamp.Value.Day })
                .Select(x => new DateValueDay
                {
@@ -148,7 +148,7 @@ namespace AplicatieLicentaIoT.Controllers
         public ActionResult<string> GetTodayHumidity()
         {
             var humidity = _context.Values
-                .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Day == DateTime.Today.Day)
+                .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Day == DateTime.Today.Day && x.Timestamp.Value.Month == DateTime.Today.Month && x.Timestamp.Value.Year == DateTime.Today.Year)
                 .GroupBy(x => new { x.Timestamp.Value.Hour })
                 .Select(x => new DateValueToday
                 {

@@ -16,6 +16,10 @@ import { ChartsModule, ThemeService } from 'ng2-charts';
 import { MonthTemperatureComponent } from './temperature/month-temperature/month-temperature.component';
 import { LastMonthTemperatureComponent } from './temperature/last-month-temperature/last-month-temperature.component';
 import { CurrentTodayHumidityComponent } from './humidity/current-today-humidity/current-today-humidity.component';
+import { SecretService } from './service/secret.service';
+import { AuthService } from './service/auth.service';
+import { RegisterComponent } from './register/register.component';
+import { LoginComponent } from './login/login.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +34,9 @@ import { CurrentTodayHumidityComponent } from './humidity/current-today-humidity
     CurrentTodayTemperatureComponent,
     CurrentTodayHumidityComponent,
     LastMonthHumidityComponent,
-    MonthHumidityComponent
+    MonthHumidityComponent,
+    RegisterComponent,
+    LoginComponent
    ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -39,6 +45,9 @@ import { CurrentTodayHumidityComponent } from './humidity/current-today-humidity
     ChartsModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
+      { path: 'login', component: LoginComponent },
+      { path: 'home', component: HomeComponent },
+      { path: 'register', component: RegisterComponent },
       { path: 'counter', component: CounterComponent },
       { path: 'fetch-data', component: FetchDataComponent },
       { path: 'temperature', component: LineChartComponent},
@@ -47,10 +56,10 @@ import { CurrentTodayHumidityComponent } from './humidity/current-today-humidity
       { path: 'current-today-temperature', component: CurrentTodayTemperatureComponent},
       { path: 'current-today-humidity', component: CurrentTodayHumidityComponent},
       { path: 'current-month-humidity', component: LastMonthHumidityComponent},
-      { path: 'months-humidity', component: MonthHumidityComponent},
+      { path: 'months-humidity', component: MonthHumidityComponent}
     ])
   ],
-  providers: [ThemeService],
+  providers: [ThemeService, SecretService, AuthService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

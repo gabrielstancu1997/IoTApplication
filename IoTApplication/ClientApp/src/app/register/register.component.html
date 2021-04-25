@@ -1,0 +1,16 @@
+
+<div class="container" id="container">
+
+  <div class="form-container sign-up-container">
+    <form action="#">
+      <h1>Create Account</h1>
+
+      <input type="text" name="username" [(ngModel)]="model.username" required #username="ngModel" class="form-control" id="username" placeholder="Username">
+      <input type="password" name="Password" [(ngModel)]="model.Password" required #Password="ngModel" class="form-control" id="Password" placeholder="Password">
+      <input type="First Name" name="FirstName" [(ngModel)]="model.firstName" required #FirstName="ngModel" placeholder="First Name"/>
+      <input type="Last Name" name="LastName" [(ngModel)]="model.lastName" required #FirstName="ngModel" placeholder="Last Name"/>
+      <button type="submit"  routerLink="/{{okToShowLogin}}" class="btn btn-primary" (click)="onSubmit()">Sign up<i class="fas fa-sign-in-alt"></i></button>
+    </form>
+
+  </div>
+  </div>

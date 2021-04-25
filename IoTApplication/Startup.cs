@@ -1,4 +1,9 @@
 using IoTApplication.Data;
+using IoTApplication.Helpers;
+using IoTApplication.IRepositories;
+using IoTApplication.IServices;
+using IoTApplication.Repositories;
+using IoTApplication.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
@@ -6,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 
 namespace IoTApplication
 {
@@ -25,12 +31,29 @@ namespace IoTApplication
              options.UseNpgsql(
                  Configuration.GetConnectionString("DefaultConnection")));
 
+
+            services.AddControllersWithViews().AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore); ;
+            
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+            });
+
             services.AddControllersWithViews();
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/dist";
             });
+
+            services.AddTransient<IUserRepository, UserRepository>();
+
+            services.AddTransient<IUserService, UserService>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,6 +75,9 @@ namespace IoTApplication
             }
 
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
+
 
             app.UseEndpoints(endpoints =>
             {
@@ -66,6 +92,8 @@ namespace IoTApplication
                 builder.AllowAnyMethod();
                 builder.AllowAnyHeader();
             });
+
+            app.UseMiddleware<JwtMiddleware>();
 
             app.UseSpa(spa =>
             {

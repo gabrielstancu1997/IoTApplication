@@ -1,0 +1,29 @@
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+<div class="container" id="container">
+
+	<div class="form-container sign-in-container">
+		<form #f="ngForm" (ngSubmit)="Login(f)">
+			<h1>Sign in</h1>
+			<input type="text" name="username" ngModel required #username="ngModel" class="form-control" id="username"placeholder="Enter username" />
+			<input type="password" name="password" ngModel required #password="ngModel" placeholder="Password" />
+			<button type="submit" [disabled]="f.invalid">Sign In</button>
+		</form>
+	</div>
+	<div class="overlay-container">
+		<div class="overlay">
+			<div class="overlay-panel overlay-left">
+				<h1>Welcome Back!</h1>
+				<p>To keep connected with us please login with your personal info</p>
+				<button class="ghost" id="signIn">Sign In</button>
+			</div>
+			<div class="overlay-panel overlay-right">
+				<h1>Hello to FoodShop!</h1>
+				<p>Enter your personal details and start journey with us</p>
+				<a routerLink="/register"><button class="ghost" id="signUp">Sign Up</button> </a>
+			</div>
+		</div>
+	</div>
+</div>

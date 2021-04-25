@@ -11,7 +11,7 @@ namespace IoTApplication.Data
     {
         public virtual DbSet<Metric> Metrics { get; set; }
         public virtual DbSet<Value> Values { get; set; }
-
+        public virtual DbSet<User> Users { get; set; }
         public ApplicationDbContext(
              DbContextOptions options) : base(options)
         {
