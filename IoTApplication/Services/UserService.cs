@@ -8,7 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 namespace IoTApplication.Services
@@ -30,8 +29,6 @@ namespace IoTApplication.Services
         {
             var entity = request.ToUserExtension(Enums.UserTypeEnum.Utilizator);
             
-            int lastId = _context.Users.OrderBy(x => x.Id).Last().Id;
-
             _userRepostiory.Create(entity);
             return _userRepostiory.SaveChanges();
         }

@@ -16,7 +16,7 @@ export class AuthService {
 
   // tslint:disable-next-line: typedef
   login(model: any){ // : Observable<IUser>
-    return this.http.post(this.appUrl + 'api/Auth/login', model).pipe(
+    return this.http.post(this.appUrl + 'api/auth/login', model).pipe(
       map((response: any) => {
         const decodedToken = this.helper.decodeToken(response.message);
         localStorage.setItem('user', response.username);
@@ -27,17 +27,16 @@ export class AuthService {
   }
 
   loggedIn(): boolean{
-    const message = String(localStorage.getItem('message'));
+    const message = localStorage.getItem('message');
     return !this.helper.isTokenExpired(message);
   }
 
   // tslint:disable-next-line: typedef
   logout() {
-    localStorage.removeItem('user');
-    localStorage.removeItem('message');
+    localStorage.clear();
   }
   // tslint:disable-next-line: typedef
   register(model: any){
-    return  this.http.post(this.appUrl + 'api/Auth/register', model);
+    return  this.http.post(this.appUrl + 'api/auth/register', model);
   }
 }

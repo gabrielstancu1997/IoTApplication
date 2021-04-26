@@ -12,9 +12,7 @@ export class RegisterComponent {
   okToShowLogin = 'register';
   model: any = {
     username: null,
-    password: null,
-    firstName: null,
-    lastName: null
+    password: null
   };
 
   constructor(

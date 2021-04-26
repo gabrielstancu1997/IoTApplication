@@ -4,12 +4,14 @@ import {HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse}
 import {Observable} from 'rxjs';
 import {tap} from 'rxjs/operators';
 
-import {ToastrService} from 'ngx-toastr';
+// import {ToastrService} from 'ngx-toastr';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
 
-  constructor(private auth: AuthService, private toastService: ToastrService) {
+  constructor(private auth: AuthService
+    // , private toastService: ToastrService
+      ) {
   }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -21,9 +23,9 @@ export class ErrorInterceptor implements HttpInterceptor {
             this.auth.logout();
           } else if (errorObject instanceof HttpErrorResponse && errorObject.status === 400) {
             const errorMessage = typeof errorObject.error === 'string' ? errorObject.error : 'Something went wrong...';
-            this.toastService.error(errorMessage);
+            console.log('success');
           } else {
-            this.toastService.error('Something went wrong...');
+            console.log('fail');
           }
         }
       }));

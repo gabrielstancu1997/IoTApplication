@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../service/auth.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-login',

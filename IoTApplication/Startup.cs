@@ -2,6 +2,7 @@ using IoTApplication.Data;
 using IoTApplication.Helpers;
 using IoTApplication.IRepositories;
 using IoTApplication.IServices;
+using IoTApplication.Models;
 using IoTApplication.Repositories;
 using IoTApplication.Services;
 using Microsoft.AspNetCore.Builder;
@@ -31,6 +32,7 @@ namespace IoTApplication
              options.UseNpgsql(
                  Configuration.GetConnectionString("DefaultConnection")));
 
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             services.AddControllersWithViews().AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore); ;

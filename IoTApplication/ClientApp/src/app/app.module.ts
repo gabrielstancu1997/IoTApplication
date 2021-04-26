@@ -20,6 +20,8 @@ import { SecretService } from './service/secret.service';
 import { AuthService } from './service/auth.service';
 import { RegisterComponent } from './register/register.component';
 import { LoginComponent } from './login/login.component';
+import { AppRoutingModule } from './app-routing.module';
+
 
 @NgModule({
   declarations: [
@@ -43,21 +45,7 @@ import { LoginComponent } from './login/login.component';
     HttpClientModule,
     FormsModule,
     ChartsModule,
-    RouterModule.forRoot([
-      { path: '', component: HomeComponent, pathMatch: 'full' },
-      { path: 'login', component: LoginComponent },
-      { path: 'home', component: HomeComponent },
-      { path: 'register', component: RegisterComponent },
-      { path: 'counter', component: CounterComponent },
-      { path: 'fetch-data', component: FetchDataComponent },
-      { path: 'temperature', component: LineChartComponent},
-      { path: 'months-temperature', component: MonthTemperatureComponent},
-      { path: 'current-month-temperature', component: LastMonthTemperatureComponent},
-      { path: 'current-today-temperature', component: CurrentTodayTemperatureComponent},
-      { path: 'current-today-humidity', component: CurrentTodayHumidityComponent},
-      { path: 'current-month-humidity', component: LastMonthHumidityComponent},
-      { path: 'months-humidity', component: MonthHumidityComponent}
-    ])
+    AppRoutingModule
   ],
   providers: [ThemeService, SecretService, AuthService],
   bootstrap: [AppComponent]
