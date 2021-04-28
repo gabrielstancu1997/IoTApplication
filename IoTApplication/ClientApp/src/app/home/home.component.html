@@ -9,15 +9,20 @@
                   <div class="title">
                       <p>Bucuresti - Apartament Stoian</p>
                   </div>
-                  <div class="temp mt-5">Temperature: 20<sup>&deg;</sup></div>
+                  <div class="temp mt-5"><p *ngIf ="current_temperature == -99">Not connected</p>
+                                         <p *ngIf ="current_temperature != -99">Temperature: {{current_temperature}}<sup>&deg;</sup> </p>
+                                        </div>
               </div>
           </div>
           <div class="col-md-6">
-              <div class="card"> <span class="icon"><img class="img-fluid" src="https://cdn.iconscout.com/icon/free/png-512/humidity-forecast-hydration-precipitation-temperature-weather-38924.png" /></span>
+              <div class="card"> <span class="icon"><img class="img-fluid" width="32" height="32" src="https://cdn.iconscout.com/icon/free/png-512/humidity-forecast-hydration-precipitation-temperature-weather-38924.png" /></span>
                   <div class="title">
                       <p>Bucuresti - Apartament Stoian</p>
                   </div>
-                  <div class="temp mt-5">Humidity: 18<sup>%</sup></div>
+                  <div class="temp mt-5">
+                    <p *ngIf ="current_humidity == -99">Not connected</p>
+                    <p *ngIf ="current_humidity != -99">Humidity: {{current_humidity}}<sup>%</sup></p>
+                  </div>
               </div>
           </div>
       </div>

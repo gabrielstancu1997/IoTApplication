@@ -1,4 +1,5 @@
-﻿using IoTApplication.Data;
+﻿using IoTApplication.BussinesRules;
+using IoTApplication.Data;
 using IoTApplication.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,13 @@ namespace AplicatieLicentaIoT.Controllers
             public double AvgMonth;
         }
 
+        public class DateValuePerDays
+        {
+            public string DateMonthName;
+            public double AvgDay;
+        }
+
+
         [Serializable]
         public class DateValueDay
         {
@@ -35,12 +43,30 @@ namespace AplicatieLicentaIoT.Controllers
             public int DayNumber;
         }
 
+        public class DateValuePerHours
+        {
+            public double AvgHour;
+            public int DayNumber;
+        }
 
         [Serializable]
         public class DateValueToday
         {
             public string HourDescription;
             public double AvgHour;
+        }
+
+        public class DateValueTodayPerMinute
+        {
+            public int Hour;
+            public double AvgMinute;
+        }
+
+
+        [Serializable]
+        public class CurrentValue
+        {
+            public double AvgMinute;
         }
 
 
@@ -70,93 +96,338 @@ namespace AplicatieLicentaIoT.Controllers
             return value;
 
         }
-       
+
         [HttpGet("months-temperature-values/{year}")]
         public ActionResult<string> GetMonthsTemperatureValues(int year)
         {
-
-            var temperature = _context.Values
+            var temperatureFromPast = _context.Values
                     .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Year == year)
-                    .GroupBy(x => new { x.Timestamp.Value.Year, x.Timestamp.Value.Month })
-                    .Select(y => new DateValue
+                    .GroupBy(x => new { x.Timestamp.Value.Year, x.Timestamp.Value.Month, x.Timestamp.Value.Day })
+                    .Select(y => new DateValuePerDays
                     {
                         DateMonthName = getFullMonthName(y.Key.Month),
-                        AvgMonth = y.Average(x => x.Value1.Value)
-                    });
+                        AvgDay = y.Average(x => x.Value1.Value)
+                    }).ToList();
 
-            return JsonConvert.SerializeObject(temperature.ToList().OrderBy(r => getNumberMonthFromName(r.DateMonthName)));
+            double[] listaValoriTrecut = new double[temperatureFromPast.Count];
+            int index = 0;
+            temperatureFromPast.ForEach(r =>
+            {
+                listaValoriTrecut[index] = r.AvgDay;
+                index++;
+            });
+
+            var temperatureWithPredictions = temperatureFromPast.GroupBy(row => row.DateMonthName)
+                                    .Select(r => new DateValue
+                                    {
+                                        DateMonthName = r.Key,
+                                        AvgMonth = r.Average(avg => avg.AvgDay)
+                                    }).ToList();
+
+            var predictions = BrArimaModel.ReturnNextFiveDaysPrognoze(listaValoriTrecut, temperatureWithPredictions.Count);
+
+            int lastMonthNumber = getNumberMonthFromName(temperatureWithPredictions.
+                                                                                    OrderByDescending(r => getNumberMonthFromName(r.DateMonthName))
+                                                                                    .Select(x => x.DateMonthName)
+                                                                                    .FirstOrDefault());
+            lastMonthNumber++;
+            predictions.ForEach(r =>
+            {
+                temperatureWithPredictions.Add(new DateValue
+                {
+                    AvgMonth = r,
+                    DateMonthName = getFullMonthName(lastMonthNumber)
+                });
+                lastMonthNumber++;
+                if (lastMonthNumber == 13)
+                {
+                    lastMonthNumber = 1;
+                }
+            });
+
+            return JsonConvert.SerializeObject(temperatureWithPredictions.OrderBy(r => getNumberMonthFromName(r.DateMonthName)));
         }
+
         [HttpGet("current-month-temperature")]
         public ActionResult<string> GetLastMonthTemperatureValue()
         {
-            var temperature = _context.Values
-                .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Month == DateTime.Today.Month && x.Timestamp.Value.Year == DateTime.Today.Year)
-                .GroupBy(x => new { x.Timestamp.Value.Day })
-                .Select(x => new DateValueDay
-                {  
-                    DayDescription =  x.Key.Day.ToString() + " "  + getFullDayName(x.Key.Day),
-                    AvgDay = x.Average(x => x.Value1.Value),
+            var temperatureFromPast = _context.Values
+                .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Month == DateTime.Today.Month - 1 && x.Timestamp.Value.Year == DateTime.Today.Year)
+                .GroupBy(x => new { x.Timestamp.Value.Day, x.Timestamp.Value.Hour })
+                .Select(x => new DateValuePerHours
+                {
+                    AvgHour = x.Average(x => x.Value1.Value),
                     DayNumber = x.Key.Day
-                });
+                }).ToList();
 
-            return JsonConvert.SerializeObject(temperature.ToList().OrderBy(r => r.DayNumber));
+            double[] listaValoriTrecut = new double[temperatureFromPast.Count];
+            int index = 0;
+            temperatureFromPast.ForEach(r =>
+            {
+                listaValoriTrecut[index] = r.AvgHour;
+                index++;
+            });
+
+            var temperatureWithPredictions = temperatureFromPast.GroupBy(row => row.DayNumber)
+                                    .Select(r => new DateValueDay
+                                    {
+                                        DayDescription = r.Key.ToString() + " " + getFullDayName(r.Key),
+                                        AvgDay = r.Average(avg => avg.AvgHour),
+                                        DayNumber = r.Key
+                                    }).ToList();
+
+            var predictions = BrArimaModel.ReturnNextFiveDaysPrognoze(listaValoriTrecut, temperatureWithPredictions.Count);
+
+            temperatureWithPredictions.OrderBy(r => r.DayNumber);
+
+            int dayNumber = 1;
+            predictions.ForEach(r =>
+            {
+                temperatureWithPredictions.Add(new DateValueDay
+                {
+                    DayDescription = dayNumber.ToString() + " " + getFullDayName(dayNumber),
+                    AvgDay = r,
+                    DayNumber = dayNumber
+                });
+                dayNumber++;
+            });
+
+            return JsonConvert.SerializeObject(temperatureWithPredictions);
         }
+
         [HttpGet("current-today-temperature")]
         public ActionResult<string> GetTodayTemperature()
         {
-            var temperature = _context.Values
-                .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Day == DateTime.Today.Day && x.Timestamp.Value.Month == DateTime.Today.Month && x.Timestamp.Value.Year == DateTime.Today.Year)
-                .GroupBy(x => new { x.Timestamp.Value.Hour })
-                .Select(x => new DateValueToday
+            var temperatureFromPast = _context.Values
+                .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Day == DateTime.Today.Day - 1
+                                                                        && x.Timestamp.Value.Month == DateTime.Today.Month
+                                                                        && x.Timestamp.Value.Year == DateTime.Today.Year)
+                .GroupBy(x => new { x.Timestamp.Value.Hour, x.Timestamp.Value.Minute })
+                .Select(x => new DateValueTodayPerMinute
                 {
-                    HourDescription = getFullDayHour(x.Key.Hour),
-                    AvgHour = x.Average(x => x.Value1.Value),
-                });
+                    Hour = x.Key.Hour,
+                    AvgMinute = x.Average(x => x.Value1.Value),
+                }).ToList();
 
-            return JsonConvert.SerializeObject(temperature.ToList().OrderBy(r => r.HourDescription));
+            double[] listaValoriTrecut = new double[temperatureFromPast.Count];
+            int index = 0;
+            temperatureFromPast.ForEach(r =>
+            {
+                listaValoriTrecut[index] = r.AvgMinute;
+                index++;
+            });
+
+            var temperatureWithPredictions = temperatureFromPast.GroupBy(row => row.Hour)
+                                   .Select(r => new DateValueToday
+                                   {
+                                       HourDescription = getFullDayHour(r.Key),
+                                       AvgHour = r.Average(avg => avg.AvgMinute)
+                                   }).ToList();
+
+            temperatureWithPredictions.OrderBy(r => r.HourDescription);
+
+            var predictions = BrArimaModel.ReturnNextFiveDaysPrognoze(listaValoriTrecut, temperatureWithPredictions.Count);
+
+            int hourNumber = 0;
+            predictions.ForEach(r =>
+            {
+                temperatureWithPredictions.Add(new DateValueToday
+                {
+                    HourDescription = getFullDayHour(hourNumber),
+                    AvgHour = r
+                });
+                hourNumber++;
+            });
+
+
+            return JsonConvert.SerializeObject(temperatureWithPredictions);
         }
+
+
+        [HttpGet("current-temperature")]
+        public double GetCurrentTemperature()
+        {
+
+            double ts_current = DateTime.Now.TimeOfDay.TotalMinutes;
+
+            double temperature = _context.Values
+                .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Hour == DateTime.Now.Hour &&
+                                                                            x.Timestamp.Value.Day == DateTime.Today.Day &&
+                                                                            x.Timestamp.Value.Month == DateTime.Today.Month &&
+                                                                            x.Timestamp.Value.Year == DateTime.Today.Year)
+                .GroupBy(x => new { x.Timestamp.Value.Hour })
+                .Select(x => x.Average(x => x.Value1.Value))
+                .FirstOrDefault();
+
+            if (temperature != null)
+            {
+                return round(temperature, 2);
+            }
+
+            return -99;
+        }
+
+
         [HttpGet("months-humidity-values/{year}")]
         public ActionResult<string> GetMonthsHumidityValues(int year)
         {
-            var humidity = _context.Values
-                 .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Year == year)
-                 .GroupBy(x => new { x.Timestamp.Value.Year, x.Timestamp.Value.Month })
-                 .Select(y => new DateValue
-                 {
-                     DateMonthName = getFullMonthName(y.Key.Month),
-                     AvgMonth = y.Average(x => x.Value1.Value)
-                 });
+            var humidityFromPast = _context.Values
+                  .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Year == year)
+                  .GroupBy(x => new { x.Timestamp.Value.Year, x.Timestamp.Value.Month, x.Timestamp.Value.Day })
+                  .Select(y => new DateValuePerDays
+                  {
+                      DateMonthName = getFullMonthName(y.Key.Month),
+                      AvgDay = y.Average(x => x.Value1.Value)
+                  }).ToList();
 
-            return JsonConvert.SerializeObject(humidity.ToList().OrderBy(r => getNumberMonthFromName(r.DateMonthName)));
+            double[] listaValoriTrecut = new double[humidityFromPast.Count];
+            int index = 0;
+            humidityFromPast.ForEach(r =>
+            {
+                listaValoriTrecut[index] = r.AvgDay;
+                index++;
+            });
+
+            var humidityWithPredictions = humidityFromPast.GroupBy(row => row.DateMonthName)
+                                    .Select(r => new DateValue
+                                    {
+                                        DateMonthName = r.Key,
+                                        AvgMonth = r.Average(avg => avg.AvgDay)
+                                    }).ToList();
+
+            var predictions = BrArimaModel.ReturnNextFiveDaysPrognoze(listaValoriTrecut, humidityWithPredictions.Count);
+
+            int lastMonthNumber = getNumberMonthFromName(humidityWithPredictions.
+                                                                                    OrderByDescending(r => getNumberMonthFromName(r.DateMonthName))
+                                                                                    .Select(x => x.DateMonthName)
+                                                                                    .FirstOrDefault());
+            lastMonthNumber++;
+            predictions.ForEach(r =>
+            {
+                humidityWithPredictions.Add(new DateValue
+                {
+                    AvgMonth = r,
+                    DateMonthName = getFullMonthName(lastMonthNumber)
+                });
+                lastMonthNumber++;
+                if (lastMonthNumber == 13)
+                {
+                    lastMonthNumber = 1;
+                }
+            });
+
+            return JsonConvert.SerializeObject(humidityWithPredictions.ToList().OrderBy(r => getNumberMonthFromName(r.DateMonthName)));
         }
         [HttpGet("current-month-humidity")]
         public ActionResult<string> GetLastMonthHumidityValue()
         {
-            var humidity = _context.Values
-               .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Month == DateTime.Today.Month && x.Timestamp.Value.Year == DateTime.Today.Year)
-               .GroupBy(x => new { x.Timestamp.Value.Day })
-               .Select(x => new DateValueDay
-               {
-                   DayDescription = x.Key.Day.ToString() + " " + getFullDayName(x.Key.Day),
-                   AvgDay = x.Average(x => x.Value1.Value),
-                   DayNumber = x.Key.Day
-               });
+            var humidityFromPast = _context.Values
+                 .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Month == DateTime.Today.Month - 1 && x.Timestamp.Value.Year == DateTime.Today.Year)
+                 .GroupBy(x => new { x.Timestamp.Value.Day, x.Timestamp.Value.Hour })
+                 .Select(x => new DateValuePerHours
+                 {
+                     AvgHour = x.Average(x => x.Value1.Value),
+                     DayNumber = x.Key.Day
+                 }).ToList();
 
-            return JsonConvert.SerializeObject(humidity.ToList().OrderBy(r => r.DayNumber));
+            double[] listaValoriTrecut = new double[humidityFromPast.Count];
+            int index = 0;
+            humidityFromPast.ForEach(r =>
+            {
+                listaValoriTrecut[index] = r.AvgHour;
+                index++;
+            });
+
+            var humidityWithPredictions = humidityFromPast.GroupBy(row => row.DayNumber)
+                                    .Select(r => new DateValueDay
+                                    {
+                                        DayDescription = r.Key.ToString() + " " + getFullDayName(r.Key),
+                                        AvgDay = r.Average(avg => avg.AvgHour),
+                                        DayNumber = r.Key
+                                    }).ToList();
+
+            var predictions = BrArimaModel.ReturnNextFiveDaysPrognoze(listaValoriTrecut, humidityWithPredictions.Count);
+
+            humidityWithPredictions.OrderBy(r => r.DayNumber);
+
+            int dayNumber = 1;
+            predictions.ForEach(r =>
+            {
+                humidityWithPredictions.Add(new DateValueDay
+                {
+                    DayDescription = dayNumber.ToString() + " " + getFullDayName(dayNumber),
+                    AvgDay = r,
+                    DayNumber = dayNumber
+                });
+                dayNumber++;
+            });
+
+            return JsonConvert.SerializeObject(humidityWithPredictions);
         }
         [HttpGet("current-today-humidity")]
         public ActionResult<string> GetTodayHumidity()
         {
-            var humidity = _context.Values
-                .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Day == DateTime.Today.Day && x.Timestamp.Value.Month == DateTime.Today.Month && x.Timestamp.Value.Year == DateTime.Today.Year)
-                .GroupBy(x => new { x.Timestamp.Value.Hour })
-                .Select(x => new DateValueToday
+            var humidityFromPast = _context.Values
+                .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Day == DateTime.Today.Day - 1
+                                                                        && x.Timestamp.Value.Month == DateTime.Today.Month
+                                                                        && x.Timestamp.Value.Year == DateTime.Today.Year)
+                .GroupBy(x => new { x.Timestamp.Value.Hour, x.Timestamp.Value.Minute })
+                .Select(x => new DateValueTodayPerMinute
                 {
-                    HourDescription = getFullDayHour(x.Key.Hour),
-                    AvgHour = x.Average(x => x.Value1.Value),
-                });
+                    Hour = x.Key.Hour,
+                    AvgMinute = x.Average(x => x.Value1.Value),
+                }).ToList();
 
-            return JsonConvert.SerializeObject(humidity.ToList().OrderBy(r => r.HourDescription));
+            double[] listaValoriTrecut = new double[humidityFromPast.Count];
+            int index = 0;
+            humidityFromPast.ForEach(r =>
+            {
+                listaValoriTrecut[index] = r.AvgMinute;
+                index++;
+            });
+
+            var humidityWithPredictions = humidityFromPast.GroupBy(row => row.Hour)
+                                   .Select(r => new DateValueToday
+                                   {
+                                       HourDescription = getFullDayHour(r.Key),
+                                       AvgHour = r.Average(avg => avg.AvgMinute)
+                                   }).ToList();
+
+            humidityWithPredictions.OrderBy(r => r.HourDescription);
+
+            var predictions = BrArimaModel.ReturnNextFiveDaysPrognoze(listaValoriTrecut, humidityWithPredictions.Count);
+
+            int hourNumber = 0;
+            predictions.ForEach(r =>
+            {
+                humidityWithPredictions.Add(new DateValueToday
+                {
+                    HourDescription = getFullDayHour(hourNumber),
+                    AvgHour = r
+                });
+                hourNumber++;
+            });
+
+            return JsonConvert.SerializeObject(humidityWithPredictions);
+        }
+
+        [HttpGet("current-humidity")]
+        public double GetCurrentHumidity()
+        {
+            double humidity = _context.Values
+                .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Hour == DateTime.Now.Hour &&
+                                                                        x.Timestamp.Value.Day == DateTime.Today.Day &&
+                                                                        x.Timestamp.Value.Month == DateTime.Today.Month &&
+                                                                        x.Timestamp.Value.Year == DateTime.Today.Year)
+                .GroupBy(x => new { x.Timestamp.Value.Hour })
+                .Select(x => x.Average(x => x.Value1.Value))
+                .FirstOrDefault();
+
+            if (humidity != null)
+            {
+                return round(humidity, 2);
+            }
+            return -99;
         }
 
 
@@ -215,7 +486,16 @@ namespace AplicatieLicentaIoT.Controllers
             }
             return -1;
         }
-    
+
+        public static double round(double value, int places)
+        {
+            if (places < 0) throw new Exception("Specific places");
+
+            long factor = (long)Math.Pow(10, places);
+            value = value * factor;
+            long tmp = (long)Math.Round(value);
+            return (double)tmp / factor;
+        }
 
 
         [HttpPost]

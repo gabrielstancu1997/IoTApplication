@@ -25,7 +25,7 @@ export class CurrentTodayTemperatureComponent {
   lineChartColors: Color[] = [
     {
       borderColor: 'black',
-      backgroundColor: 'rgba(255,165,0,0.28)',
+      backgroundColor: 'rgba(82, 179, 217, 1)',
     },
   ];
 
@@ -34,6 +34,21 @@ export class CurrentTodayTemperatureComponent {
   lineChartType = 'line';
   chartReady: boolean;
   http: any;
+
+  listAverageMonthsPrediction: number[] = [];
+  lineChartDataPrediction: ChartDataSets[] = [];
+  lineChartLabelsPrediction: Label[] = [];
+  lineChartOptionsPrediction = {
+    responsive: true,
+  };
+
+  lineChartColorsPrediction: Color[] = [
+    {
+      borderColor: 'black',
+      backgroundColor: 'rgba(242, 120, 75, 1)',
+    },
+  ];
+
 
   constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
 
@@ -46,15 +61,22 @@ export class CurrentTodayTemperatureComponent {
         }
       );
 
-      this.listDateMonthAverageValueParse.forEach(
-        r => {
-          this.listAverageMonths.push(r.AvgHour);
-          this.lineChartLabels.push(r.HourDescription);
-        }
-      );
+      for (let index = 0; index < this.listDateMonthAverageValueParse.length / 2; index++) {
+        this.listAverageMonths.push(this.listDateMonthAverageValueParse[index].AvgHour);
+        this.lineChartLabels.push(this.listDateMonthAverageValueParse[index].HourDescription);
+      }
+
+      for (let index = this.listDateMonthAverageValueParse.length / 2 ; index < this.listDateMonthAverageValueParse.length; index++ ) {
+        this.listAverageMonthsPrediction.push(this.listDateMonthAverageValueParse[index].AvgHour);
+        this.lineChartLabelsPrediction.push(this.listDateMonthAverageValueParse[index].HourDescription);
+      }
 
       this.lineChartData = [
-        { data: this.listAverageMonths, label: 'Temperature of the day' },
+        { data: this.listAverageMonths, label: 'Temperature of the last 24 hours' },
+      ];
+
+      this.lineChartDataPrediction = [
+        {data : this.listAverageMonthsPrediction, label: 'Prediction for the next 24 hours'}
       ];
 
       this.chartReady = true;

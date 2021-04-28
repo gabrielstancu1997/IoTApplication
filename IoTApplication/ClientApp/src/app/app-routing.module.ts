@@ -6,7 +6,6 @@ import { HomeComponent } from './home/home.component';
 import { CurrentTodayHumidityComponent } from './humidity/current-today-humidity/current-today-humidity.component';
 import { LastMonthHumidityComponent } from './humidity/last-month-humidity/last-month-humidity.component';
 import { MonthHumidityComponent } from './humidity/month-humidity/month-humidity.component';
-import { LineChartComponent } from './line-chart/line-chart.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
 import { AuthguardService } from './service/authguard.service';
@@ -21,7 +20,6 @@ const appRoutes: Routes = [
   { path: 'register', component: RegisterComponent},
   { path: 'counter', component: CounterComponent, canActivate: [AuthguardService] },
   { path: 'fetch-data', component: FetchDataComponent, canActivate: [AuthguardService] },
-  { path: 'temperature', component: LineChartComponent, canActivate: [AuthguardService]},
   { path: 'months-temperature', component: MonthTemperatureComponent, canActivate: [AuthguardService]},
   { path: 'current-month-temperature', component: LastMonthTemperatureComponent, canActivate: [AuthguardService]},
   { path: 'current-today-temperature', component: CurrentTodayTemperatureComponent, canActivate: [AuthguardService]},

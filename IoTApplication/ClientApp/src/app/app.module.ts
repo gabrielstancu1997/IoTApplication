@@ -1,7 +1,6 @@
 import { MonthHumidityComponent } from './humidity/month-humidity/month-humidity.component';
 import { LastMonthHumidityComponent } from './humidity/last-month-humidity/last-month-humidity.component';
 import { CurrentTodayTemperatureComponent } from './temperature/current-today-temperature/current-today-temperature.component';
-import { LineChartComponent } from './line-chart/line-chart.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -30,7 +29,6 @@ import { AppRoutingModule } from './app-routing.module';
     HomeComponent,
     CounterComponent,
     FetchDataComponent,
-    LineChartComponent,
     MonthTemperatureComponent,
     LastMonthTemperatureComponent,
     CurrentTodayTemperatureComponent,

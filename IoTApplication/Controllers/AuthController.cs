@@ -16,13 +16,13 @@ namespace IoTApplication.Controllers
         {
             this._userService = userService;
         }
-
+        [AllowAnonymous]
         [HttpPost("register")]
         public IActionResult Register(AuthenticationRequest request)
         {
             return Ok(_userService.Register(request));
         }
-
+        [AllowAnonymous]
         [HttpPost("login")]
         public IActionResult Login(AuthenticationRequest request)
         {

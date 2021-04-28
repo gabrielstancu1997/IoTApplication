@@ -35,6 +35,20 @@ export class LastMonthTemperatureComponent {
   chartReady: boolean;
   http: any;
 
+  listAverageMonthsPrediction: number[] = [];
+  lineChartDataPrediction: ChartDataSets[] = [];
+  lineChartLabelsPrediction: Label[] = [];
+  lineChartOptionsPrediction = {
+    responsive: true,
+  };
+
+  lineChartColorsPrediction: Color[] = [
+    {
+      borderColor: 'black',
+      backgroundColor: 'rgba(242, 120, 75, 1)',
+    },
+  ];
+
   constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
 
     http.get<LastMonthAverageValue[]>(baseUrl + 'Values/current-month-temperature').subscribe(result => {
@@ -46,15 +60,22 @@ export class LastMonthTemperatureComponent {
         }
       );
 
-      this.listDateMonthAverageValueParse.forEach(
-        r => {
-          this.listAverageMonths.push(r.AvgDay);
-          this.lineChartLabels.push(r.DayDescription);
-        }
-      );
+      for (let index = 0; index < this.listDateMonthAverageValueParse.length / 2; index++) {
+        this.listAverageMonths.push(this.listDateMonthAverageValueParse[index].AvgDay);
+        this.lineChartLabels.push(this.listDateMonthAverageValueParse[index].DayDescription);
+      }
+
+      for (let index = this.listDateMonthAverageValueParse.length / 2 ; index < this.listDateMonthAverageValueParse.length; index++ ) {
+        this.listAverageMonthsPrediction.push(this.listDateMonthAverageValueParse[index].AvgDay);
+        this.lineChartLabelsPrediction.push(this.listDateMonthAverageValueParse[index].DayDescription);
+      }
 
       this.lineChartData = [
-        { data: this.listAverageMonths, label: 'Temperature of the month' },
+        { data: this.listAverageMonths, label: 'Temperature for the days of the previous month' },
+      ];
+
+      this.lineChartDataPrediction = [
+        {data : this.listAverageMonthsPrediction, label: 'Prediction for the next days'}
       ];
 
       this.chartReady = true;

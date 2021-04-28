@@ -25,7 +25,7 @@ export class CurrentTodayHumidityComponent {
   lineChartColors: Color[] = [
     {
       borderColor: 'black',
-      backgroundColor: 'rgba(41,185,190,0.28)',
+      backgroundColor: 'rgba(145, 61, 136, 1)',
     },
   ];
 
@@ -35,27 +35,49 @@ export class CurrentTodayHumidityComponent {
   chartReady: boolean;
   http: any;
 
+
+  listAverageMonthsPrediction: number[] = [];
+  lineChartDataPrediction: ChartDataSets[] = [];
+  lineChartLabelsPrediction: Label[] = [];
+  lineChartOptionsPrediction = {
+    responsive: true,
+  };
+
+  lineChartColorsPrediction: Color[] = [
+    {
+      borderColor: 'black',
+      backgroundColor: 'rgba(242, 120, 75, 1)',
+    },
+  ];
+
   constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
 
     http.get<DateValueToday[]>(baseUrl + 'Values/current-today-humidity').subscribe(result => {
-      this.listDateMonthAverageValue = result;
+    this.listDateMonthAverageValue = result;
 
-      this.listDateMonthAverageValue.forEach(
-        r => {
-          this.listDateMonthAverageValueParse.push(JSON.parse(JSON.stringify(r)));
-        }
-      );
+    this.listDateMonthAverageValue.forEach(
+      r => {
+        this.listDateMonthAverageValueParse.push(JSON.parse(JSON.stringify(r)));
+      }
+    );
 
-      this.listDateMonthAverageValueParse.forEach(
-        r => {
-          this.listAverageMonths.push(r.AvgHour);
-          this.lineChartLabels.push(r.HourDescription);
-        }
-      );
+    for (let index = 0; index < this.listDateMonthAverageValueParse.length / 2; index++) {
+      this.listAverageMonths.push(this.listDateMonthAverageValueParse[index].AvgHour);
+      this.lineChartLabels.push(this.listDateMonthAverageValueParse[index].HourDescription);
+    }
 
-      this.lineChartData = [
-        { data: this.listAverageMonths, label: 'Humidity of the day' },
-      ];
+    for (let index = this.listDateMonthAverageValueParse.length / 2 ; index < this.listDateMonthAverageValueParse.length; index++ ) {
+      this.listAverageMonthsPrediction.push(this.listDateMonthAverageValueParse[index].AvgHour);
+      this.lineChartLabelsPrediction.push(this.listDateMonthAverageValueParse[index].HourDescription);
+    }
+
+    this.lineChartData = [
+      { data: this.listAverageMonths, label: 'Humidity of the last 24 hours' },
+    ];
+
+    this.lineChartDataPrediction = [
+      {data : this.listAverageMonthsPrediction, label: 'Prediction for the next 24 hours'}
+    ];
 
       this.chartReady = true;
     }, error => console.error(error));

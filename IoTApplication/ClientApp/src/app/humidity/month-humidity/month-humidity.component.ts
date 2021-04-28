@@ -34,6 +34,20 @@ export class MonthHumidityComponent {
   lineChartType = 'bar';
   chartReady: boolean;
   http: any;
+
+  listAverageMonthsPrediction: number[] = [];
+  lineChartDataPrediction: ChartDataSets[] = [];
+  lineChartLabelsPrediction: Label[] = [];
+  lineChartOptionsPrediction = {
+    responsive: true,
+  };
+
+  lineChartColorsPrediction: Color[] = [
+    {
+      borderColor: 'black',
+      backgroundColor: 'rgba(242, 120, 75, 1)',
+    },
+  ];
   constructor(http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
 
     http.get<DateMonthAverageValue[]>(baseUrl + 'Values/months-humidity-values/2021').subscribe(result => {
@@ -45,16 +59,24 @@ export class MonthHumidityComponent {
         }
       );
 
-      this.listDateMonthAverageValueParse.forEach(
-        r => {
-          this.listAverageMonths.push(r.AvgMonth);
-          this.lineChartLabels.push(r.DateMonthName);
-        }
-      );
+      for (let index = 0; index < this.listDateMonthAverageValueParse.length / 2; index++) {
+        this.listAverageMonths.push(this.listDateMonthAverageValueParse[index].AvgMonth);
+        this.lineChartLabels.push(this.listDateMonthAverageValueParse[index].DateMonthName);
+      }
+
+      for (let index = this.listDateMonthAverageValueParse.length / 2 ; index < this.listDateMonthAverageValueParse.length; index++ ) {
+        this.listAverageMonthsPrediction.push(this.listDateMonthAverageValueParse[index].AvgMonth);
+        this.lineChartLabelsPrediction.push(this.listDateMonthAverageValueParse[index].DateMonthName);
+      }
 
       this.lineChartData = [
         { data: this.listAverageMonths, label: 'Humidity of the Year' },
       ];
+
+      this.lineChartDataPrediction = [
+        {data : this.listAverageMonthsPrediction, label: 'Prediction for the next months'}
+      ];
+
 
       this.chartReady = true;
     }, error => console.error(error));
