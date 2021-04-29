@@ -94,19 +94,18 @@ namespace AplicatieLicentaIoT.Controllers
             }
 
             return value;
-
         }
 
         [HttpGet("months-temperature-values/{year}")]
         public ActionResult<string> GetMonthsTemperatureValues(int year)
         {
-            var temperatureFromPast = _context.Values
+            var temperatureFromPast = _context.ValueSummarizes
                     .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Year == year)
                     .GroupBy(x => new { x.Timestamp.Value.Year, x.Timestamp.Value.Month, x.Timestamp.Value.Day })
                     .Select(y => new DateValuePerDays
                     {
                         DateMonthName = getFullMonthName(y.Key.Month),
-                        AvgDay = y.Average(x => x.Value1.Value)
+                        AvgDay = y.Average(x => (x.TheSum.Value / x.TheCount.Value))
                     }).ToList();
 
             double[] listaValoriTrecut = new double[temperatureFromPast.Count];
@@ -151,12 +150,12 @@ namespace AplicatieLicentaIoT.Controllers
         [HttpGet("current-month-temperature")]
         public ActionResult<string> GetLastMonthTemperatureValue()
         {
-            var temperatureFromPast = _context.Values
+            var temperatureFromPast = _context.ValueSummarizes
                 .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Month == DateTime.Today.Month - 1 && x.Timestamp.Value.Year == DateTime.Today.Year)
                 .GroupBy(x => new { x.Timestamp.Value.Day, x.Timestamp.Value.Hour })
                 .Select(x => new DateValuePerHours
                 {
-                    AvgHour = x.Average(x => x.Value1.Value),
+                    AvgHour = x.Average(x => (x.TheSum.Value /x.TheCount.Value)),
                     DayNumber = x.Key.Day
                 }).ToList();
 
@@ -198,7 +197,7 @@ namespace AplicatieLicentaIoT.Controllers
         [HttpGet("current-today-temperature")]
         public ActionResult<string> GetTodayTemperature()
         {
-            var temperatureFromPast = _context.Values
+            var temperatureFromPast = _context.ValueSummarizes
                 .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Day == DateTime.Today.Day - 1
                                                                         && x.Timestamp.Value.Month == DateTime.Today.Month
                                                                         && x.Timestamp.Value.Year == DateTime.Today.Year)
@@ -206,7 +205,7 @@ namespace AplicatieLicentaIoT.Controllers
                 .Select(x => new DateValueTodayPerMinute
                 {
                     Hour = x.Key.Hour,
-                    AvgMinute = x.Average(x => x.Value1.Value),
+                    AvgMinute = x.Average(x => (x.TheSum.Value / x.TheCount.Value)),
                 }).ToList();
 
             double[] listaValoriTrecut = new double[temperatureFromPast.Count];
@@ -249,17 +248,17 @@ namespace AplicatieLicentaIoT.Controllers
         {
 
             double ts_current = DateTime.Now.TimeOfDay.TotalMinutes;
-
-            double temperature = _context.Values
+            
+            double temperature = _context.ValueSummarizes
                 .Where(x => x.MetricId == (int)MetricType.Temperature && x.Timestamp.Value.Hour == DateTime.Now.Hour &&
                                                                             x.Timestamp.Value.Day == DateTime.Today.Day &&
                                                                             x.Timestamp.Value.Month == DateTime.Today.Month &&
                                                                             x.Timestamp.Value.Year == DateTime.Today.Year)
                 .GroupBy(x => new { x.Timestamp.Value.Hour })
-                .Select(x => x.Average(x => x.Value1.Value))
+                .Select(x => x.Average(x => (x.TheSum.Value / x.TheCount.Value)))
                 .FirstOrDefault();
 
-            if (temperature != null)
+            if (temperature != 0)
             {
                 return round(temperature, 2);
             }
@@ -271,13 +270,13 @@ namespace AplicatieLicentaIoT.Controllers
         [HttpGet("months-humidity-values/{year}")]
         public ActionResult<string> GetMonthsHumidityValues(int year)
         {
-            var humidityFromPast = _context.Values
+            var humidityFromPast = _context.ValueSummarizes
                   .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Year == year)
                   .GroupBy(x => new { x.Timestamp.Value.Year, x.Timestamp.Value.Month, x.Timestamp.Value.Day })
                   .Select(y => new DateValuePerDays
                   {
                       DateMonthName = getFullMonthName(y.Key.Month),
-                      AvgDay = y.Average(x => x.Value1.Value)
+                      AvgDay = y.Average(x => x.TheSum.Value / x.TheCount.Value)
                   }).ToList();
 
             double[] listaValoriTrecut = new double[humidityFromPast.Count];
@@ -321,12 +320,12 @@ namespace AplicatieLicentaIoT.Controllers
         [HttpGet("current-month-humidity")]
         public ActionResult<string> GetLastMonthHumidityValue()
         {
-            var humidityFromPast = _context.Values
+            var humidityFromPast = _context.ValueSummarizes
                  .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Month == DateTime.Today.Month - 1 && x.Timestamp.Value.Year == DateTime.Today.Year)
                  .GroupBy(x => new { x.Timestamp.Value.Day, x.Timestamp.Value.Hour })
                  .Select(x => new DateValuePerHours
                  {
-                     AvgHour = x.Average(x => x.Value1.Value),
+                     AvgHour = x.Average(x => x.TheSum.Value / x.TheCount.Value ),
                      DayNumber = x.Key.Day
                  }).ToList();
 
@@ -367,7 +366,7 @@ namespace AplicatieLicentaIoT.Controllers
         [HttpGet("current-today-humidity")]
         public ActionResult<string> GetTodayHumidity()
         {
-            var humidityFromPast = _context.Values
+            var humidityFromPast = _context.ValueSummarizes
                 .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Day == DateTime.Today.Day - 1
                                                                         && x.Timestamp.Value.Month == DateTime.Today.Month
                                                                         && x.Timestamp.Value.Year == DateTime.Today.Year)
@@ -375,7 +374,7 @@ namespace AplicatieLicentaIoT.Controllers
                 .Select(x => new DateValueTodayPerMinute
                 {
                     Hour = x.Key.Hour,
-                    AvgMinute = x.Average(x => x.Value1.Value),
+                    AvgMinute = x.Average(x => x.TheSum.Value / x.TheCount.Value),
                 }).ToList();
 
             double[] listaValoriTrecut = new double[humidityFromPast.Count];
@@ -414,16 +413,16 @@ namespace AplicatieLicentaIoT.Controllers
         [HttpGet("current-humidity")]
         public double GetCurrentHumidity()
         {
-            double humidity = _context.Values
+            double humidity = _context.ValueSummarizes
                 .Where(x => x.MetricId == (int)MetricType.Humidity && x.Timestamp.Value.Hour == DateTime.Now.Hour &&
                                                                         x.Timestamp.Value.Day == DateTime.Today.Day &&
                                                                         x.Timestamp.Value.Month == DateTime.Today.Month &&
                                                                         x.Timestamp.Value.Year == DateTime.Today.Year)
                 .GroupBy(x => new { x.Timestamp.Value.Hour })
-                .Select(x => x.Average(x => x.Value1.Value))
+                .Select(x => x.Average(x => x.TheSum.Value / x.TheCount.Value))
                 .FirstOrDefault();
 
-            if (humidity != null)
+            if (humidity != 0)
             {
                 return round(humidity, 2);
             }
@@ -442,7 +441,7 @@ namespace AplicatieLicentaIoT.Controllers
         // function to get the full month name 
         static string getFullDayName(int day)
         {
-            DateTime date = new DateTime(DateTime.Today.Year, DateTime.Today.Month, day);
+            DateTime date = new DateTime(DateTime.Today.Year, DateTime.Today.Month-1, day);
 
             return date.ToString("dddd");
         }
