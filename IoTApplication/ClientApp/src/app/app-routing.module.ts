@@ -1,3 +1,4 @@
+import { LastYearTemperatureComponent } from './temperature/last-year-temperature/last-year-temperature.component';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { CounterComponent } from './counter/counter.component';
@@ -12,6 +13,7 @@ import { AuthguardService } from './service/authguard.service';
 import { CurrentTodayTemperatureComponent } from './temperature/current-today-temperature/current-today-temperature.component';
 import { LastMonthTemperatureComponent } from './temperature/last-month-temperature/last-month-temperature.component';
 import { MonthTemperatureComponent } from './temperature/month-temperature/month-temperature.component';
+import { LastYearHumidityComponent } from './humidity/last-year-humidity/last-year-humidity.component';
 
 const appRoutes: Routes = [
   { path: '', component: HomeComponent, pathMatch: 'full' , canActivate: [AuthguardService]},
@@ -23,9 +25,11 @@ const appRoutes: Routes = [
   { path: 'months-temperature', component: MonthTemperatureComponent, canActivate: [AuthguardService]},
   { path: 'current-month-temperature', component: LastMonthTemperatureComponent, canActivate: [AuthguardService]},
   { path: 'current-today-temperature', component: CurrentTodayTemperatureComponent, canActivate: [AuthguardService]},
+  { path: 'last-year-temperature', component: LastYearTemperatureComponent, canActivate: [AuthguardService]},
   { path: 'current-today-humidity', component: CurrentTodayHumidityComponent, canActivate: [AuthguardService]},
   { path: 'current-month-humidity', component: LastMonthHumidityComponent, canActivate: [AuthguardService]},
   { path: 'months-humidity', component: MonthHumidityComponent, canActivate: [AuthguardService]},
+  { path: 'last-year-humidity', component: LastYearHumidityComponent, canActivate: [AuthguardService]},
   { path: '**', redirectTo: '/' }
 ];
 

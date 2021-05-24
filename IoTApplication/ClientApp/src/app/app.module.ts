@@ -1,3 +1,5 @@
+import { LastYearHumidityComponent } from './humidity/last-year-humidity/last-year-humidity.component';
+import { LastYearTemperatureComponent } from './temperature/last-year-temperature/last-year-temperature.component';
 import { MonthHumidityComponent } from './humidity/month-humidity/month-humidity.component';
 import { LastMonthHumidityComponent } from './humidity/last-month-humidity/last-month-humidity.component';
 import { CurrentTodayTemperatureComponent } from './temperature/current-today-temperature/current-today-temperature.component';
@@ -20,8 +22,6 @@ import { AuthService } from './service/auth.service';
 import { RegisterComponent } from './register/register.component';
 import { LoginComponent } from './login/login.component';
 import { AppRoutingModule } from './app-routing.module';
-
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -35,6 +35,8 @@ import { AppRoutingModule } from './app-routing.module';
     CurrentTodayHumidityComponent,
     LastMonthHumidityComponent,
     MonthHumidityComponent,
+    LastYearTemperatureComponent,
+    LastYearHumidityComponent,
     RegisterComponent,
     LoginComponent
    ],

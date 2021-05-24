@@ -23,10 +23,9 @@
           <li class="nav-item" [routerLinkActive]="['link-active']">
             <a class="nav-link text-dark" [routerLink]="['/']">IoT Hub</a>
           </li>
-
           <li class="nav-item" [routerLinkActive]="['link-active']">
-            <a class="nav-link text-dark" [routerLink]="['/months-temperature']"
-              >Temperature of the Year</a>
+            <a class="nav-link text-dark" [routerLink]="['/last-year-temperature']"
+              >Last year temperature</a>
           </li>
           <li class="nav-item" [routerLinkActive]="['link-active']">
             <a class="nav-link text-dark" [routerLink]="['/current-month-temperature']"
@@ -35,6 +34,13 @@
           <li class="nav-item" [routerLinkActive]="['link-active']">
             <a class="nav-link text-dark" [routerLink]="['/current-today-temperature']"
               >Temperature of the Day</a>
+          </li>
+          <li class="nav-item" [routerLinkActive]="['link-active']">
+            <a class="nav-link text-dark" [routerLink]="['/months-temperature']"
+              >Temperature of the Year</a>
+          </li>
+          <li class="nav-item" [routerLinkActive]="['link-active']">
+            <a class="nav-link text-dark" [routerLink]="['/last-year-humidity']">Last year humidity</a>
           </li>
           <li class="nav-item" [routerLinkActive]="['link-active']">
             <a class="nav-link text-dark" [routerLink]="['/current-today-humidity']"

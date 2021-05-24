@@ -12,6 +12,7 @@
     <BuildServerSideRenderer>false</BuildServerSideRenderer>
 	<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 	<GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+	<UserSecretsId>d75f3047-b354-4238-b072-6bf42546a459</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,13 +30,13 @@
 
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
+    <Compile Remove="IService\**" />
     <Content Remove="$(SpaRoot)**" />
+    <Content Remove="IService\**" />
+    <EmbeddedResource Remove="IService\**" />
     <None Remove="$(SpaRoot)**" />
+    <None Remove="IService\**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="IService\" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

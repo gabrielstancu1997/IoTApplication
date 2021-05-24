@@ -1,6 +1,4 @@
-﻿using Extreme.Mathematics;
-using Extreme.Statistics.TimeSeriesAnalysis;
-using System;
+﻿using Extreme.Statistics.TimeSeriesAnalysis;
 using System.Collections.Generic;
 
 
@@ -8,30 +6,25 @@ namespace IoTApplication.BussinesRules
 {
     public class BrArimaModel
     {
-        public static List<double> ReturnNextFiveDaysPrognoze(double[] pTimeSeriesData, int pnNumarDePredictiiReturnate)
+        public static List<double> ReturnNextDaysPrognoze(double[] pTimeSeriesData, int pnNumarDePredictiiReturnate)
         {
-
-            // The time series data is stored in a numerical variable:
 
             if (pTimeSeriesData.Length <= 5)
                 return new List<double>();
-            // An integrated model (with differencing) is constructed
-            // by supplying the degree of differencing. Note the order
-            // of the orders is the traditional one for an ARIMA(p,d,q)
-            // model (p, d, q).
-            // The following constructs an ARIMA(0,1,2) model:
+        
+            // ARIMA(p,d,q) -> ARIMA(2,1,2) este modelul cu parametrii p = 2, d = 1, q = 2:
             ArimaModel model = new(pTimeSeriesData, 2, 1, 2)
             {
 
-                // By default, the mean is assumed to be zero for an integrated model.
-                // We can override this by setting the EstimateMean property to true:
+                // EstimateMean trebuie să fie pe true
                 EstimateMean = true
                 
             };
 
-            // The Compute methods fits the model.
+            // Potrivirea datelor cu toate proprietățile.
             model.Fit();
-
+            
+            // Returnarea vectorului de predicții
             var vectorPredictions = model.Forecast(pnNumarDePredictiiReturnate);
 
             List<double> predictionsResult = new();

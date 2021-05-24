@@ -104,7 +104,7 @@ namespace AplicatieLicentaIoT.Controllers
                     .GroupBy(x => new { x.Timestamp.Value.Year, x.Timestamp.Value.Month, x.Timestamp.Value.Day })
                     .Select(y => new DateValuePerDays
                     {
-                        DateMonthName = getFullMonthName(y.Key.Month),
+                        DateMonthName = getFullMonthName(y.Key.Month, year),
                         AvgDay = y.Average(x => (x.TheSum.Value / x.TheCount.Value))
                     }).ToList();
 
@@ -123,7 +123,7 @@ namespace AplicatieLicentaIoT.Controllers
                                         AvgMonth = r.Average(avg => avg.AvgDay)
                                     }).ToList();
 
-            var predictions = BrArimaModel.ReturnNextFiveDaysPrognoze(listaValoriTrecut, temperatureWithPredictions.Count);
+            var predictions = BrArimaModel.ReturnNextDaysPrognoze(listaValoriTrecut, temperatureWithPredictions.Count);
 
             int lastMonthNumber = getNumberMonthFromName(temperatureWithPredictions.
                                                                                     OrderByDescending(r => getNumberMonthFromName(r.DateMonthName))
@@ -132,19 +132,20 @@ namespace AplicatieLicentaIoT.Controllers
             lastMonthNumber++;
             predictions.ForEach(r =>
             {
-                temperatureWithPredictions.Add(new DateValue
-                {
-                    AvgMonth = r,
-                    DateMonthName = getFullMonthName(lastMonthNumber)
-                });
-                lastMonthNumber++;
                 if (lastMonthNumber == 13)
                 {
                     lastMonthNumber = 1;
                 }
+                temperatureWithPredictions.Add(new DateValue
+                {
+                    AvgMonth = r,
+                    DateMonthName = getFullMonthName(lastMonthNumber,year)
+                });
+                lastMonthNumber++;
+              
             });
-
-            return JsonConvert.SerializeObject(temperatureWithPredictions.OrderBy(r => getNumberMonthFromName(r.DateMonthName)));
+            //.OrderBy(r => getNumberMonthFromName(r.DateMonthName))
+            return JsonConvert.SerializeObject(temperatureWithPredictions);
         }
 
         [HttpGet("current-month-temperature")]
@@ -175,7 +176,7 @@ namespace AplicatieLicentaIoT.Controllers
                                         DayNumber = r.Key
                                     }).ToList();
 
-            var predictions = BrArimaModel.ReturnNextFiveDaysPrognoze(listaValoriTrecut, temperatureWithPredictions.Count);
+            var predictions = BrArimaModel.ReturnNextDaysPrognoze(listaValoriTrecut, temperatureWithPredictions.Count);
 
             temperatureWithPredictions.OrderBy(r => r.DayNumber);
 
@@ -225,7 +226,7 @@ namespace AplicatieLicentaIoT.Controllers
 
             temperatureWithPredictions.OrderBy(r => r.HourDescription);
 
-            var predictions = BrArimaModel.ReturnNextFiveDaysPrognoze(listaValoriTrecut, temperatureWithPredictions.Count);
+            var predictions = BrArimaModel.ReturnNextDaysPrognoze(listaValoriTrecut, temperatureWithPredictions.Count);
 
             int hourNumber = 0;
             predictions.ForEach(r =>
@@ -275,7 +276,7 @@ namespace AplicatieLicentaIoT.Controllers
                   .GroupBy(x => new { x.Timestamp.Value.Year, x.Timestamp.Value.Month, x.Timestamp.Value.Day })
                   .Select(y => new DateValuePerDays
                   {
-                      DateMonthName = getFullMonthName(y.Key.Month),
+                      DateMonthName = getFullMonthName(y.Key.Month,year),
                       AvgDay = y.Average(x => x.TheSum.Value / x.TheCount.Value)
                   }).ToList();
 
@@ -294,7 +295,7 @@ namespace AplicatieLicentaIoT.Controllers
                                         AvgMonth = r.Average(avg => avg.AvgDay)
                                     }).ToList();
 
-            var predictions = BrArimaModel.ReturnNextFiveDaysPrognoze(listaValoriTrecut, humidityWithPredictions.Count);
+            var predictions = BrArimaModel.ReturnNextDaysPrognoze(listaValoriTrecut, humidityWithPredictions.Count);
 
             int lastMonthNumber = getNumberMonthFromName(humidityWithPredictions.
                                                                                     OrderByDescending(r => getNumberMonthFromName(r.DateMonthName))
@@ -303,19 +304,20 @@ namespace AplicatieLicentaIoT.Controllers
             lastMonthNumber++;
             predictions.ForEach(r =>
             {
-                humidityWithPredictions.Add(new DateValue
-                {
-                    AvgMonth = r,
-                    DateMonthName = getFullMonthName(lastMonthNumber)
-                });
-                lastMonthNumber++;
                 if (lastMonthNumber == 13)
                 {
                     lastMonthNumber = 1;
                 }
+                humidityWithPredictions.Add(new DateValue
+                {
+                    AvgMonth = r,
+                    DateMonthName = getFullMonthName(lastMonthNumber, year)
+                });
+                lastMonthNumber++;
+           
             });
 
-            return JsonConvert.SerializeObject(humidityWithPredictions.ToList().OrderBy(r => getNumberMonthFromName(r.DateMonthName)));
+            return JsonConvert.SerializeObject(humidityWithPredictions);
         }
         [HttpGet("current-month-humidity")]
         public ActionResult<string> GetLastMonthHumidityValue()
@@ -345,7 +347,7 @@ namespace AplicatieLicentaIoT.Controllers
                                         DayNumber = r.Key
                                     }).ToList();
 
-            var predictions = BrArimaModel.ReturnNextFiveDaysPrognoze(listaValoriTrecut, humidityWithPredictions.Count);
+            var predictions = BrArimaModel.ReturnNextDaysPrognoze(listaValoriTrecut, humidityWithPredictions.Count);
 
             humidityWithPredictions.OrderBy(r => r.DayNumber);
 
@@ -394,7 +396,7 @@ namespace AplicatieLicentaIoT.Controllers
 
             humidityWithPredictions.OrderBy(r => r.HourDescription);
 
-            var predictions = BrArimaModel.ReturnNextFiveDaysPrognoze(listaValoriTrecut, humidityWithPredictions.Count);
+            var predictions = BrArimaModel.ReturnNextDaysPrognoze(listaValoriTrecut, humidityWithPredictions.Count);
 
             int hourNumber = 0;
             predictions.ForEach(r =>
@@ -431,9 +433,9 @@ namespace AplicatieLicentaIoT.Controllers
 
 
         // function to get the full month name 
-        static string getFullMonthName(int month)
+        static string getFullMonthName(int month,int year)
         {
-            DateTime date = new DateTime(DateTime.Today.Year, month, 1);
+            DateTime date = new DateTime(year, month, 1);
 
             return date.ToString("MMMM");
         }
